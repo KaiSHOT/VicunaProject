@@ -93,7 +93,7 @@ export function describeDecision(
   }
   if (decision.type === "draw") return `${player.name} が山札から1枚引いた`;
   if (decision.type === "fold") return `${player.name} がラウンドを降りた`;
-  return `${player.name} は行動できずパスした`;
+  return `${player.name} は行動できず投了した`;
 }
 
 // 1手（予約宣言があれば続けて実際のアクションまで）進め、ログ文字列を返す

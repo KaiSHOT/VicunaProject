@@ -3,27 +3,33 @@ interface ChipRowProps {
 }
 
 export default function ChipRow({ chips }: ChipRowProps) {
-  const sorted = [...chips].sort((a, b) => b - a);
+  const black = chips.filter((c) => c === 10).length;
+  const white = chips.filter((c) => c === 1).length;
+
+  if (black === 0 && white === 0) {
+    return <span className="text-xs text-vicuna-text-secondary">なし</span>;
+  }
+
   return (
-    <div className="flex flex-wrap gap-1">
-      {sorted.map((c, i) =>
-        c === 10 ? (
+    <div className="flex gap-3 text-xs font-bold">
+      {black > 0 && (
+        <span className="flex items-center gap-1 text-vicuna-text-primary">
           <span
-            key={i}
-            className="w-5 h-5 rounded-full bg-neutral-900 border border-neutral-600 text-[9px] text-white flex items-center justify-center"
-          >
-            10
-          </span>
-        ) : (
-          <span
-            key={i}
-            className="w-5 h-5 rounded-full bg-white border border-neutral-400 text-[9px] text-neutral-800 flex items-center justify-center"
-          >
-            1
-          </span>
-        )
+            aria-hidden="true"
+            className="inline-block w-2.5 h-2.5 rounded-full bg-neutral-900 border border-vicuna-text-secondary/50"
+          />
+          ×{black}
+        </span>
       )}
-      {chips.length === 0 && <span className="text-xs text-vicuna-text-secondary">なし</span>}
+      {white > 0 && (
+        <span className="flex items-center gap-1 text-vicuna-text-primary">
+          <span
+            aria-hidden="true"
+            className="inline-block w-2.5 h-2.5 rounded-full bg-vicuna-cream border border-vicuna-cream-border"
+          />
+          ×{white}
+        </span>
+      )}
     </div>
   );
 }

@@ -1,9 +1,17 @@
 import { useRef, useState } from "react";
 import type { GameState, Player } from "../engine/types";
 import { runAiTurn } from "../engine/ai";
-import { checkGameOverPlayer, getTopToken, initPlayers, startRoundState } from "../engine/rules";
+import {
+  checkGameOverPlayer,
+  createBank,
+  getTopToken,
+  initPlayers,
+  startRoundState,
+} from "../engine/rules";
 import Card from "../components/Card";
 import PlayerBadge from "../components/PlayerBadge";
+
+const PENALTY = 5;
 
 interface CvcWatchProps {
   onExit: () => void;
@@ -11,7 +19,6 @@ interface CvcWatchProps {
 
 export default function CvcWatch({ onExit }: CvcWatchProps) {
   const [numPlayers, setNumPlayers] = useState(3);
-  const [penalty, setPenalty] = useState(2);
   const [gs, setGs] = useState<GameState | null>(null);
   const [roundNumber, setRoundNumber] = useState(1);
   const [log, setLog] = useState<string[]>([]);
@@ -26,7 +33,7 @@ export default function CvcWatch({ onExit }: CvcWatchProps) {
 
   function start() {
     const ps = initPlayers(numPlayers, Array(numPlayers).fill(true));
-    setGs(startRoundState(ps, 0, penalty));
+    setGs(startRoundState(ps, 0, PENALTY, createBank()));
     setRoundNumber(1);
     setLog([]);
     setWinner(null);
@@ -48,7 +55,7 @@ export default function CvcWatch({ onExit }: CvcWatchProps) {
             : 0;
         setRoundNumber((n) => n + 1);
         pushLogs([`--- ラウンド開始 ---`]);
-        return startRoundState(cur.players, startIdx, penalty);
+        return startRoundState(cur.players, startIdx, PENALTY, cur.bank);
       }
       const { gs: ngs, logs } = runAiTurn(cur);
       pushLogs(logs);
@@ -100,24 +107,8 @@ export default function CvcWatch({ onExit }: CvcWatchProps) {
               ))}
             </div>
           </div>
-          <div>
-            <div className="text-sm mb-2">予約失敗ペナルティ</div>
-            <div className="flex gap-2">
-              {[2, 5, 10].map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setPenalty(v)}
-                  className={[
-                    "px-3 py-1 rounded border-2 text-sm font-bold",
-                    penalty === v
-                      ? "bg-vicuna-risk border-vicuna-risk-light text-white"
-                      : "border-vicuna-panel-border text-vicuna-text-secondary",
-                  ].join(" ")}
-                >
-                  +{v}
-                </button>
-              ))}
-            </div>
+          <div className="text-sm text-vicuna-text-secondary">
+            予約失敗ペナルティ: +{PENALTY}（固定）
           </div>
         </div>
         <button

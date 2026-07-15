@@ -5,13 +5,13 @@ export default {
     extend: {
       colors: {
         vicuna: {
-          bg: "#4A7A3D",
+          bg: "#5C9350",
           panel: "#2F4F28",
           "panel-border": "#4D6F42",
           board: {
-            light: "#5C9350",
-            DEFAULT: "#4A7A3D",
-            dark: "#355C2C",
+            light: "#70A664",
+            DEFAULT: "#5C9350",
+            dark: "#4A7A3D",
           },
           accent: {
             light: "#E7BE70",

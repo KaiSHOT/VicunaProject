@@ -26,6 +26,11 @@ export interface RoundResult {
   handLossMap: Record<number, number>;
 }
 
+// 物理チップ銀行。黒（10点相当）は20枚上限で共有、白（1点相当）は無制限のため枚数管理不要。
+export interface Bank {
+  black: number;
+}
+
 export interface GameState {
   deck: CardT[];
   discard: CardT[];
@@ -36,6 +41,7 @@ export interface GameState {
   roundOver: boolean;
   roundResult: RoundResult | null;
   penalty: number;
+  bank: Bank;
 }
 
 export interface LegalActions {

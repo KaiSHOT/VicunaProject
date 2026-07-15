@@ -1,6 +1,6 @@
 import type { AiMode, BatchResult, SingleGameResult } from "./types";
 import { runAiTurn } from "./ai";
-import { checkGameOverPlayer, chipScore, initPlayers, startRoundState } from "./rules";
+import { checkGameOverPlayer, chipScore, createBank, initPlayers, startRoundState } from "./rules";
 
 // ---- ヘッドレスシミュレーション（統計モード用）----
 
@@ -11,13 +11,14 @@ export function simulateOneGame(
 ): SingleGameResult {
   let players = initPlayers(numPlayers, Array(numPlayers).fill(true));
   let startIdx = 0;
+  let bank = createBank();
   let rounds = 0;
   let reserveDeclared = 0;
   let reserveSuccess = 0;
   const reserveSuccessPlayerIds: number[] = []; // 予約成功したプレイヤーIDの履歴（同一人物が複数回でも記録）
 
   while (true) {
-    let gs = startRoundState(players, startIdx, penalty);
+    let gs = startRoundState(players, startIdx, penalty, bank);
     rounds += 1;
     let guard = 0;
     while (!gs.roundOver && guard < 2000) {
@@ -33,6 +34,7 @@ export function simulateOneGame(
       }
     }
     players = gs.players;
+    bank = gs.bank; // 銀行はゲーム内で引き継ぐ（ラウンドをまたいでリセットしない）
     const winner = checkGameOverPlayer(players);
     if (winner) {
       const finalScores = players.map((p) => ({ id: p.id, score: chipScore(p.chips) }));
