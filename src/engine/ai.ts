@@ -1,5 +1,5 @@
-import type { AiMode, Decision, GameState, Player } from "./types";
-import { cardLabel, cardValue } from "./deck";
+import type { AiMode, Decision, GameState, Player } from "./types.ts";
+import { cardLabel, cardValue } from "./deck.ts";
 import {
   applyDraw,
   applyFold,
@@ -8,7 +8,8 @@ import {
   applyReserve,
   chipScore,
   legalActions,
-} from "./rules";
+} from "./rules.ts";
+import { randomFloat } from "./rng.ts";
 
 // =====================================================
 // AIロジック
@@ -24,7 +25,7 @@ export function decideAiAction(gs: GameState, aiMode: AiMode = "smart"): Decisio
   if (canReserve) {
     if (aiMode === "naive") {
       // 手札の質・黒チップ・ペナルティを一切見ない固定確率ベースライン
-      if (Math.random() < NAIVE_RESERVE_PROB) {
+      if (randomFloat() < NAIVE_RESERVE_PROB) {
         return { type: "reserve" };
       }
     } else {
@@ -41,7 +42,7 @@ export function decideAiAction(gs: GameState, aiMode: AiMode = "smart"): Decisio
       if (behind && blackCount >= 2 && handQuality > threshold) {
         return { type: "reserve" };
       }
-      if (behind && blackCount === 1 && handQuality > threshold && Math.random() < 0.6) {
+      if (behind && blackCount === 1 && handQuality > threshold && randomFloat() < 0.6) {
         return { type: "reserve" };
       }
     }
@@ -61,7 +62,7 @@ export function decideAiAction(gs: GameState, aiMode: AiMode = "smart"): Decisio
   }
   if (canDraw) {
     const drawProb = Math.max(0.15, 1 - p.hand.length * 0.09);
-    if (Math.random() < drawProb || !canFold) return { type: "draw" };
+    if (randomFloat() < drawProb || !canFold) return { type: "draw" };
   }
   if (canFold) return { type: "fold" };
   return { type: "pass" };
