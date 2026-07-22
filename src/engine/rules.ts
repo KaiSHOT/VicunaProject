@@ -1,5 +1,5 @@
-import type { Bank, CardT, GameState, LegalActions, Player } from "./types";
-import { cardValue, isPlayable, makeDeck, shuffle } from "./deck";
+import type { Bank, CardT, GameState, LegalActions, Player } from "./types.ts";
+import { cardValue, isPlayable, makeDeck, shuffle } from "./deck.ts";
 
 // =====================================================
 // ゲームルール・状態遷移（純粋関数）

@@ -11,3 +11,6 @@ dist-ssr
 
 # OS
 .DS_Store
+
+# Claude
+.claude

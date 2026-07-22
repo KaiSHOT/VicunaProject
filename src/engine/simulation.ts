@@ -1,6 +1,6 @@
-import type { AiMode, BatchResult, SingleGameResult } from "./types";
-import { runAiTurn } from "./ai";
-import { checkGameOverPlayer, chipScore, createBank, initPlayers, startRoundState } from "./rules";
+import type { AiMode, BatchResult, SingleGameResult } from "./types.ts";
+import { runAiTurn } from "./ai.ts";
+import { checkGameOverPlayer, chipScore, createBank, initPlayers, startRoundState } from "./rules.ts";
 
 // ---- ヘッドレスシミュレーション（統計モード用）----
 
