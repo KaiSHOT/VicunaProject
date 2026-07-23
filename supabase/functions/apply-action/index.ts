@@ -3,39 +3,10 @@ import { adminClient } from "../_shared/db.ts";
 import { respond, fail } from "../_shared/http.ts";
 import { handlePreflight } from "../_shared/cors.ts";
 import { toPublicView, toPrivateView, type PlayerRow, type RoomRow } from "../_shared/view.ts";
-import {
-  applyDraw,
-  applyFold,
-  applyPass,
-  applyPlay,
-  applyReserve,
-  checkGameOverPlayer,
-  legalActions,
-} from "../../../src/engine/rules.ts";
+import { applyValidatedDecision } from "../_shared/game-actions.ts";
+import { advanceCpuTurns } from "../_shared/cpu-turns.ts";
+import { checkGameOverPlayer } from "../../../src/engine/rules.ts";
 import type { Decision, GameState } from "../../../src/engine/types.ts";
-
-function applyDecisionServerSide(gs: GameState, decision: Decision): GameState {
-  const legal = legalActions(gs);
-  switch (decision.type) {
-    case "play":
-      if (!legal.canPlay.some((c) => c.id === decision.cardId)) {
-        throw new Error("そのカードは出せません");
-      }
-      return applyPlay(gs, decision.cardId);
-    case "draw":
-      if (!legal.canDraw) throw new Error("山札から引けません");
-      return applyDraw(gs);
-    case "fold":
-      if (!legal.canFold) throw new Error("このラウンドは降りられません");
-      return applyFold(gs);
-    case "reserve":
-      if (!legal.canReserve) throw new Error("予約は宣言できません");
-      return applyReserve(gs);
-    case "pass":
-      if (!legal.canPass) throw new Error("パスできません");
-      return applyPass(gs);
-  }
-}
 
 Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
@@ -77,7 +48,7 @@ Deno.serve(async (req) => {
 
   let nextGs: GameState;
   try {
-    nextGs = applyDecisionServerSide(gs, decision as Decision);
+    nextGs = applyValidatedDecision(gs, decision as Decision);
   } catch (e) {
     return fail(400, "illegal_action", e instanceof Error ? e.message : "不正な操作です");
   }
@@ -115,7 +86,8 @@ Deno.serve(async (req) => {
     game_state_after: nextGs,
   });
 
-  const publicView = toPublicView(updatedRoom, (players ?? []) as PlayerRow[]);
+  const playerRows = (players ?? []) as PlayerRow[];
+  const publicView = toPublicView(updatedRoom, playerRows);
 
   await db.channel(`room:${roomCode}`).send({
     type: "broadcast",
@@ -123,8 +95,25 @@ Deno.serve(async (req) => {
     payload: publicView,
   });
 
+  // 次の手番がCPU席なら、人間の入力を待たずにそのままサーバー側で自動進行させる。
+  const cascade = await advanceCpuTurns(
+    db,
+    roomRow.id,
+    roomCode,
+    roomRow.round_no,
+    playerRows,
+    nextTurnVersion,
+    nextGs
+  );
+  const finalRoom: RoomRow = {
+    ...updatedRoom,
+    game_state: cascade.gs,
+    turn_version: cascade.turnVersion,
+    status: cascade.status,
+  };
+
   return respond(200, {
-    public: publicView,
-    private: toPrivateView(nextGs, seatIdx),
+    public: toPublicView(finalRoom, playerRows),
+    private: toPrivateView(cascade.gs, seatIdx),
   });
 });

@@ -3,6 +3,7 @@ import { adminClient } from "../_shared/db.ts";
 import { respond, fail } from "../_shared/http.ts";
 import { handlePreflight } from "../_shared/cors.ts";
 import { toPublicView, toPrivateView, type PlayerRow, type RoomRow } from "../_shared/view.ts";
+import { advanceCpuTurns } from "../_shared/cpu-turns.ts";
 import { checkGameOverPlayer, createBank, startRoundState } from "../../../src/engine/rules.ts";
 import type { GameState, Player } from "../../../src/engine/types.ts";
 
@@ -112,8 +113,25 @@ Deno.serve(async (req) => {
     payload: publicView,
   });
 
+  // ラウンド最初の手番がCPU席なら、そのままサーバー側で自動進行させる。
+  const cascade = await advanceCpuTurns(
+    db,
+    roomRow.id,
+    roomCode,
+    nextRoundNo,
+    playerRows,
+    updatedRoom.turn_version,
+    nextGs
+  );
+  const finalRoom: RoomRow = {
+    ...updatedRoom,
+    game_state: cascade.gs,
+    turn_version: cascade.turnVersion,
+    status: cascade.status,
+  };
+
   return respond(200, {
-    public: publicView,
-    private: toPrivateView(nextGs, seatIdx),
+    public: toPublicView(finalRoom, playerRows),
+    private: toPrivateView(cascade.gs, seatIdx),
   });
 });
