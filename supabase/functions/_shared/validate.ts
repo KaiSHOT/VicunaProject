@@ -19,6 +19,11 @@ export const JoinRoomSchema = z.object({
   nickname: z.string().min(1).max(20),
 });
 
+export const AddCpuPlayerSchema = z.object({
+  roomCode: z.string().min(1),
+  nickname: z.string().min(1).max(20).default("CPU"),
+});
+
 export const StartRoundSchema = z.object({
   roomCode: z.string().min(1),
   seatIdx: z.number().int(),

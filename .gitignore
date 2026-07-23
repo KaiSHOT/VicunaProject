@@ -14,3 +14,6 @@ dist-ssr
 
 # Claude
 .claude
+
+# ローカル動作確認用スクリプト
+scripts/
