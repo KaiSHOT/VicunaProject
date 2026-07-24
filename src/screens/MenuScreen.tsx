@@ -1,4 +1,4 @@
-export type AppMode = "menu" | "pvc" | "cvcWatch" | "cvcStats" | "rules";
+export type AppMode = "menu" | "pvc" | "pvp" | "cvcWatch" | "cvcStats" | "rules";
 
 interface MenuScreenProps {
   onSelect: (mode: AppMode) => void;
@@ -17,17 +17,27 @@ export default function MenuScreen({ onSelect }: MenuScreenProps) {
           対AI戦
         </button>
         <button
-          onClick={() => onSelect("cvcWatch")}
-          className="px-5 py-3 bg-vicuna-info text-white font-bold rounded-lg hover:bg-vicuna-info-light"
+          onClick={() => onSelect("pvp")}
+          className="px-5 py-3 bg-vicuna-info-dark text-white font-bold rounded-lg hover:bg-vicuna-info"
         >
-          CvC 観戦モード
+          友達と対戦（PvP）
         </button>
-        <button
-          onClick={() => onSelect("cvcStats")}
-          className="px-5 py-3 bg-vicuna-risk text-white font-bold rounded-lg hover:bg-vicuna-risk-light"
-        >
-          CvC 統計シミュレーション
-        </button>
+        {import.meta.env.DEV && (
+          <>
+            <button
+              onClick={() => onSelect("cvcWatch")}
+              className="px-5 py-3 bg-vicuna-info text-white font-bold rounded-lg hover:bg-vicuna-info-light"
+            >
+              CvC 観戦モード
+            </button>
+            <button
+              onClick={() => onSelect("cvcStats")}
+              className="px-5 py-3 bg-vicuna-risk text-white font-bold rounded-lg hover:bg-vicuna-risk-light"
+            >
+              CvC 統計シミュレーション
+            </button>
+          </>
+        )}
         <button
           onClick={() => onSelect("rules")}
           className="px-5 py-3 bg-transparent border border-vicuna-text-secondary text-vicuna-text-secondary font-bold rounded-lg hover:bg-vicuna-panel/60"
